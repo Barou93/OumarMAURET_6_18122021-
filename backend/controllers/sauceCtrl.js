@@ -9,10 +9,10 @@ exports.createSauce = (req, res, next) => {
     //Récupérer l'authentification sur le header
 
 
-    const saucesObjectValue = JSON.parse(req.body.sauce);
-    delete saucesObjectValue._id;
+    const sauceObject = JSON.parse(req.body.sauce);
+    delete sauceObject._id;
     const sauce = new Sauce({
-        ...saucesObjectValue,
+        ...sauceObject,
 
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
         likes: 0,
@@ -27,33 +27,33 @@ exports.createSauce = (req, res, next) => {
 
 },
     exports.modifyOneSauce = (req, res, next) => {
-        let sauceValue = [];
+        let sauceObject = {};
         req.file ? (
             //Si la modification doit prendre en compte l'image
             Sauce.findOne({
                 _id: req.params.id
             })
-                .then(sauce => {
+                .then((sauce) => {
                     //Supprimer l'image d'origine
-                    const filename = sauce.imagUrl.split('/images')[1];
+                    const filename = sauce.imageUrl.split('/images')[1];
                     fs.unlinkSync(`images/${filename}`);
                 }),
-            sauceValue = {
+            sauceObject = {
                 //Ajouter la nouvelle image
                 ...JSON.parse(req.body.sauce),
-                imageUrl: `${req.protocol}//${req.get('host')}/images/
+                imageUrl: `${req.protocol}://${req.get('host')}/images/
                 ${req.file.filename}`,
             }
         ) : (
             //Si la modification ne  prends pas en compte l'image
-            sauceValue = {
+            sauceObject = {
                 ...req.body
             }
         )
-        Sauce.findByIdAndUpdate({
+        Sauce.updateOne({
             _id: req.params.id
         }, {
-            ...sauceValue,
+            ...sauceObject,
             _id: req.params.id
         }
         )
@@ -80,14 +80,14 @@ exports.createSauce = (req, res, next) => {
 
     exports.getOneSauce = (req, res, next) => {
         //Verification avec la methode findOne et on passe une comparaison et s'assure que l'id de la sauce est égale a ID de la requête
-        Sauce.findById({ _id: req.params.id })
-            .then(sauces => res.status(200).json({ sauces }))
+        Sauce.findOne({ _id: req.params.id })
+            .then(sauce => res.status(200).json({ sauce }))
             .catch(error => res.status(404).json({ error }))
 
     },
     exports.getAllSauces = (req, res, next) => {
         Sauce.find()
-            .then(sauce => res.status(200).json(sauce))
+            .then(sauces => res.status(200).json(sauces))
             .catch(error => res.status(404).json(error));
 
     },
@@ -96,8 +96,8 @@ exports.createSauce = (req, res, next) => {
 
     exports.addLikesAndDislikes = (req, res, next) => {
         //Add likes and dislikes values in the sauces
-        const userId = req.body.userId;
         const likes = req.body.like;
+        const userId = req.body.userId;
         const sauceId = req.params.id;
         console.log(req.body);
 
@@ -163,7 +163,7 @@ exports.createSauce = (req, res, next) => {
                             .catch(err => res.status(404).json(new Error('Impossible de retirer le likes')))
                     }
                 })
-                .catch()
+                .catch((error) => res.status(404).json({ error }))
         }
 
 
