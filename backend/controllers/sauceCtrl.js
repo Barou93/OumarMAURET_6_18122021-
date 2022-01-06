@@ -17,8 +17,8 @@ exports.createSauce = (req, res, next) => {
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
         likes: 0,
         dislikes: 0,
-        userLiked: [],
-        userDisliked: []
+        usersLiked: [],
+        usersDisliked: []
 
     });
     sauce.save()
@@ -81,7 +81,7 @@ exports.createSauce = (req, res, next) => {
     exports.getOneSauce = (req, res, next) => {
         //Verification avec la methode findOne et on passe une comparaison et s'assure que l'id de la sauce est égale a ID de la requête
         Sauce.findOne({ _id: req.params.id })
-            .then(sauce => res.status(200).json({ sauce }))
+            .then(sauce => res.status(200).json(sauce))
             .catch(error => res.status(404).json({ error }))
 
     },

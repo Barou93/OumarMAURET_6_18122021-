@@ -1,12 +1,39 @@
 const mongoose = require('mongoose');
 
 //Connect databse
+require('dotenv').config();
 
-mongoose.connect(
-    "mongodb://baroumauret:PokemonMali@sopeckoko-shard-00-00.sm2ev.mongodb.net:27017,sopeckoko-shard-00-01.sm2ev.mongodb.net:27017,sopeckoko-shard-00-02.sm2ev.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-6fpozz-shard-0&authSource=admin&retryWrites=true&w=majority",
+const dbString = process.env.DB_MONGODB;
+const dbOptions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+}
+mongoose.connect(dbString, dbOptions,
+    (err) => {
+        if (!err) console.log('MongoDB connected !')
+        else (err => console.log('Connection error' + err));
+    });
+
+
+//Connection to MongoDB
+/*const connection = () => {
+    mongoose.connect(dbString, dbOptions)
+        .then(() => console.log('MongoDB connected ! '))
+        .catch(err => console.log('Connection error' + err));
+}*/
+
+/*
+const connection = mongoose.createConnection(dbString, dbOptions)
+
+
+mongoose.connect(process.env.DB_MONGODB,
     { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
     (err) => {
         if (!err) console.log('MongoDB connected ! ');
         else console.log('Connection error' + err);
     }
-)
+)*/
+
+
+
