@@ -34,16 +34,13 @@ exports.login = (req, res, next) => {
                     if (!valid) {
                         return res.status(401).json({ Error: 'Votre mot de passe est erroné !' });
                     }
-                    const newToken = jwt.sign(
-                        { userId: user._id },
-                        process.env.TOKEN_KEY,
-                        { expiresIn: '1h' }
-                    );
-                    //req.session.token = newToken; //Send token in the session and create a new cookies
-
                     res.status(200).json({
                         userId: user._id,
-                        token: newToken //Add the new user token in the frontend
+                        token: jwt.sign(
+                            { userId: user._id },
+                            process.env.TOKEN_KEY,
+                            { expiresIn: '24h' }
+                        ) //Add the new user token in the frontend
                     });
                 })
                 .catch(error => res.status(500).json({ error }));

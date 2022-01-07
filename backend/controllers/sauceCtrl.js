@@ -8,7 +8,6 @@ const fs = require('fs');
 exports.createSauce = (req, res, next) => {
     //Récupérer l'authentification sur le header
 
-
     const sauceObject = JSON.parse(req.body.sauce);
     delete sauceObject._id;
     const sauce = new Sauce({
@@ -99,8 +98,7 @@ exports.createSauce = (req, res, next) => {
         const likes = req.body.like;
         const userId = req.body.userId;
         const sauceId = req.params.id;
-        console.log(req.body);
-
+        // If User add likes 
         if (likes === 1) {
             Sauce.updateOne(
                 { _id: sauceId },
