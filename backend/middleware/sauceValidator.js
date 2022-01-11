@@ -1,7 +1,5 @@
-const validate = require('mongoose-validator');
+const validate = require('validator');
 
-//Regex pour vérifier que l'utilisation utilise uniquement des chiffres ou soit des lettres
-const pattern = /^[a-z\d\-_\s]+$/i;
 
 module.exports = (req, res, next) => {
 

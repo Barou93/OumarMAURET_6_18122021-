@@ -3,10 +3,7 @@ const fs = require('fs');
 
 
 
-
-
 exports.createSauce = (req, res, next) => {
-    //Récupérer l'authentification sur le header
 
     const sauceObject = JSON.parse(req.body.sauce);
     delete sauceObject._id;
@@ -22,7 +19,7 @@ exports.createSauce = (req, res, next) => {
     });
     sauce.save()
         .then(() => res.status(201).json({ message: 'Votre sauce a été ajouter avec succès' }))
-        .catch(error => res.status(401).json({ error }));
+        .catch(error => res.status(401).json(new Error(error)));
 
 },
     exports.modifyOneSauce = (req, res, next) => {
@@ -33,7 +30,7 @@ exports.createSauce = (req, res, next) => {
                 _id: req.params.id
             })
                 .then((sauce) => {
-                    //Supprimer l'image d'origine
+                    //Supprimer l'image d'origine 
                     const filename = sauce.imageUrl.split('/images')[1];
                     fs.unlinkSync(`images/${filename}`);
                 }),
@@ -57,23 +54,29 @@ exports.createSauce = (req, res, next) => {
         }
         )
             .then(() => res.status(200).json({ message: 'Sauce modifié avec succès !' }))
-            .catch(err => res.status(400).json({ err }));
+            .catch(err => res.status(400).json(new Error(err)));
     },
+
 
     exports.deleteOneSauce = (req, res, next) => {
         Sauce.findOne({
             _id: req.params.id,
         })
             .then(sauce => {
-                const filename = sauce.imageUrl.split('/images/')[1];
-                fs.unlink(`images/${filename}`, () => {
-                    Sauce.deleteOne({ _id: req.params.id })
-                        .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
-                        .catch(error => res.status(400).json({ error }));
-                })
+                //Vérifier si le Userid est  !=  du UserId de la sauce à supprimer
+                if (sauce.userId !== req.userId) {
+                    res.status(401).json(new Error('Not Authorized!'))
+                } else {
+                    //Si le UserId correspond à celui de la sauce supprimer de la db
+                    const filename = sauce.imageUrl.split('/images/')[1];
+                    fs.unlink(`images/${filename}`, () => {
+                        Sauce.deleteOne({ _id: req.params.id })
+                            .then(() => res.status(200).json({ message: 'Sauce supprimée !' }))
+                            .catch(error => res.status(400).json(new Error(error)));
+                    })
+                }
             })
-            .catch(err => res.status(500).json({ err }))
-
+            .catch(err => res.status(500).json(new Error(err)))
     },
 
 
@@ -81,13 +84,13 @@ exports.createSauce = (req, res, next) => {
         //Verification avec la methode findOne et on passe une comparaison et s'assure que l'id de la sauce est égale a ID de la requête
         Sauce.findOne({ _id: req.params.id })
             .then(sauce => res.status(200).json(sauce))
-            .catch(error => res.status(404).json({ error }))
+            .catch(error => res.status(404).json(new Error(error)))
 
     },
     exports.getAllSauces = (req, res, next) => {
         Sauce.find()
             .then(sauces => res.status(200).json(sauces))
-            .catch(error => res.status(404).json(error));
+            .catch(error => res.status(404).json(new Error(error)));
 
     },
 
@@ -110,7 +113,7 @@ exports.createSauce = (req, res, next) => {
                         likes: +1
                     },
                 }).then(() => res.status(201).json({ message: `J'aime ajouter avec succès!` }))
-                .catch(err => res.status(404).json(new Error()));
+                .catch(err => res.status(404).json(new Error(err)));
         }
         if (likes === -1) {
             Sauce.updateOne(
@@ -123,7 +126,7 @@ exports.createSauce = (req, res, next) => {
                         dislikes: +1
                     }
                 }).then(() => res.status(200).json({ message: `Je n'aime pas ajouter avec succès` }))
-                .catch(err => res.status(404).json(new Error()));
+                .catch(err => res.status(404).json(new Error(err)));
         }
         if (likes === 0) {
             Sauce.findOne({ _id: sauceId })
@@ -142,7 +145,7 @@ exports.createSauce = (req, res, next) => {
                                 }
                             })
                             .then(() => res.status(200).json({ message: 'Likes rétirer avec succès' }))
-                            .catch(err => res.status(404).json(new Error('Impossible de retirer le likes')))
+                            .catch(err => res.status(404).json(new Error(err)))
                     }
                     if (sauce.usersDisliked.includes(userId)) {
                         Sauce.updateOne(
@@ -158,7 +161,7 @@ exports.createSauce = (req, res, next) => {
                                 }
                             })
                             .then(() => res.status(200).json({ message: 'Likes rétirer avec succès' }))
-                            .catch(err => res.status(404).json(new Error('Impossible de retirer le likes')))
+                            .catch(err => res.status(404).json(new Error(err)))
                     }
                 })
                 .catch((error) => res.status(404).json({ error }))

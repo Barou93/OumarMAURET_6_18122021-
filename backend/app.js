@@ -1,13 +1,10 @@
 const express = require('express');
-//const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const userRoutes = require('./routes/user');
 const sauceRoutes = require('./routes/sauce');
 const fs = require('fs');
 const path = require('path');
-const morgan = require('morgan');
-const nocache = require('nocache');
-const session = require('express-session');
 const app = express();
 require('dotenv').config();
 require('./models/dbConfig');
@@ -28,27 +25,12 @@ app.use((req, res, next) => {
 //Autoriser les requêtes aux formats JSON
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// Log toutes les requêtes passées au serveur (sécurité)
-const accesLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
-app.use(morgan('combined', { stream: accesLogStream }));
 
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        httpOnly: true,
-        maxAge: 3600000 // validate in 1h/ 
-    }
-}));
+//Permet d'exploiter les donnés du cookies
+app.use(cookieParser());
 
 
-//Sécurisé l' application contre certaines des vulnérabilité.
-
-
-
-//Disable browser cache 
-app.use(nocache())
+//JWT ROUTES
 
 //API Routes
 app.use('/images', express.static(path.join(__dirname, 'images')));
